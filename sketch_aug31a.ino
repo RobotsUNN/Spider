@@ -65,15 +65,15 @@ float sx, sy;
 void moveS(float _cAngle,float _fAngle,float _tAngle)
 {
   float _cAngle1 = rad2deg(_cAngle);
-  float _fAngle1 = 100.0+rad2deg(_fAngle);
-  float _tAngle1 = rad2deg(_tAngle);
+  float _fAngle1 = rad2deg(_fAngle)+ 70;
+  float _tAngle1 = 30 - rad2deg(_tAngle); //рационализировать доводку до угла
   Serial.println("");
   Serial.println(_cAngle1);
   Serial.println(_fAngle1);
   Serial.println(_tAngle1);       
   
   setAngle(0,_cAngle1);
- // delay(5000);
+  //delay(5000);
   setAngle(1,_fAngle1);
   //delay(5000);
   setAngle(2,_tAngle1);
@@ -97,15 +97,46 @@ void reach(float _x, float _y, float _z)
         //return cAngle;
 
         float localDestX = sqrt(sqr(hDist) - sqr(14.0)) - 12.0;
-        Serial.println("Local X: ");
         Serial.println(localDestX);
-        float localDestY = _z;
+        float localDestY = _z - 10.0;
+        Serial.println(localDestY);
+        Serial.println("");
         float localDistSqr = sqr(localDestX) + sqr(localDestY);
         if (localDistSqr > sqr (60.0 + 65.0))
         {
           Serial.println("Can't reach!");
           //return;
         }
+
+        float A = 2 * localDestX;
+        Serial.println(A);
+        float B = 2 * localDestY;
+        Serial.println(B);
+        float C = -(sqr(localDestX) + sqr(localDestY) + sqr(60.0) - sqr(65.0));
+        Serial.println(C);
+        Serial.println("");
+        float _A = (sqr(A)/sqr(B)) + 1;
+        float _B = 2*A*C/sqr(B);
+        float _C = ((sqr(C)) / sqr(B)) - sqr(60.0);
+        Serial.println(_A);
+        Serial.println(_B);
+        Serial.println(_C);
+        Serial.println("");
+
+        float X1 = (-_B + sqrt(sqr(_B) - 4*_A*_C)) / (2*_A); //ERROR
+        float X2 = (-_B - sqrt(sqr(_B) - 4*_A*_C)) / (2*_A); //ERROR
+        Serial.println(X1);
+        Serial.println(X2);
+        float jointLocalX = (X1 > X2) ? X1 : X2; //ERROR 
+        Serial.println(jointLocalX);
+        float jointLocalY = (X1 > X2) ? ((-C-A*X1) / B) : ((-C-A*X2) / B);//ERROR
+        Serial.println(jointLocalY);
+        float primaryFemurAngle = polarAngle(jointLocalX, jointLocalY);
+        float fAngle = primaryFemurAngle;
+
+        float primaryTibiaAngle = polarAngle(localDestX - jointLocalX, localDestY - jointLocalY);
+        float tAngle = primaryTibiaAngle ;
+        /*
         float A = -2 * localDestX;
         float B = -2 * localDestY;
         float C = sqr(localDestX) + sqr(localDestY) + sqr(60.0) - sqr(65.0);
@@ -126,7 +157,7 @@ void reach(float _x, float _y, float _z)
  
         float primaryTibiaAngle = polarAngle(localDestX - jointLocalX, localDestY - jointLocalY);
         float tAngle = (primaryTibiaAngle);
-
+        */
         moveS(cAngle,fAngle,tAngle);
         
 }
@@ -140,17 +171,25 @@ void reach(float _x, float _y, float _z)
   pwm.begin();
   pwm.setPWMFreq(50);
   yield();
-
+setAngle(0,90.0);
 }
 
 void loop() {
-  setAngle(1,0.0);
-  delay(2000);
-  setAngle(1, 90.0);
-  delay(2000);
+  //setAngle(0,90.0);
+  //setAngle(1,90.0);
+ // setAngle(2,70.0);
+ delay(5000);
+  //reach(-60.0, 100.0, 0.0);
+  //delay(5000);
+  //reach(-60.0, 70.0, 0.0);
+  //delay(5000);
+ // reach(-30.0, 70.0, 0.0);
+  //delay(5000);
+  reach( 50.0, 80.0, 20.0);
+  //delay(100000);
 
   
-  //delay(5000);
+  delay(5000);
   //reach(30.0,60.0,0.0);
  // delay(100000);
 
