@@ -65,14 +65,14 @@ float sx, sy;
 void moveS(float _cAngle,float _fAngle,float _tAngle)
 {
   float _cAngle1 = rad2deg(_cAngle) ;
-  float _fAngle1 = 90+rad2deg(_fAngle);// 70
+  float _fAngle1 = 90+rad2deg(_fAngle) - 20;// 70
   Serial.println("CAngle: ");
   Serial.println(rad2deg(_cAngle));
   Serial.println("FAngle:");
   Serial.println(rad2deg(_fAngle));
   Serial.println("TAngle:");
   Serial.println(rad2deg(_tAngle));
-  float _tAngle1 = 30  + rad2deg(_fAngle) - rad2deg(_tAngle) ; //рационализировать доводку до угла. Минус, т.к оси в другой стороне. ИМЕЕТ СМЫСЛ ДОБАВИТЬ ФЕМУР УГОЛ СЮДА.
+  float _tAngle1 = 30  + rad2deg(_fAngle) - rad2deg(_tAngle)-30 ;
   Serial.println("");
   Serial.println(_cAngle1);
   Serial.println(_fAngle1);
@@ -89,18 +89,18 @@ void reach(float _x, float _y, float _z)
         float hDist = sqrt( sqr(_x) +  sqr(_y) );
         Serial.println("Dist: ");
         Serial.println(hDist);
-        float additionalCoxaAngle = asin( 20.0 / hDist );
+        float additionalCoxaAngle = asin( 5.0 / hDist );
         Serial.println("Additional: ");
         Serial.println(rad2deg(additionalCoxaAngle));
         
         float primaryCoxaAngle = polarAngle(_x, _y);
         Serial.println("Primary: ");
         Serial.println(rad2deg(primaryCoxaAngle));
-        float cAngle = primaryCoxaAngle - additionalCoxaAngle;
+        float cAngle = primaryCoxaAngle + additionalCoxaAngle;
         Serial.println("");
         //return cAngle;
 
-        float localDestX = sqrt(sqr(hDist) - sqr(20.0)) - 14.0;
+        float localDestX = sqrt(sqr(hDist) - sqr(5.0)) - 14.0;
         Serial.println("New Local DestX: ");
         Serial.println(localDestX);
         float localDestY = _z - 15.0;
@@ -150,10 +150,10 @@ void reach(float _x, float _y, float _z)
         /*
         float A = -2 * localDestX;
         float B = -2 * localDestY;
-        float C = sqr(localDestX) + sqr(localDestY) + sqr(60.0) - sqr(65.0);
+        float C = sqr(localDestX) + sqr(localDestY) + sqr(51.0) - sqr(71.0);
         float X0 = -A * C / (sqr(A) + sqr(B));
         float Y0 = -B * C / (sqr(A) + sqr(B));
-        float D = sqrt( sqr(60.0) - (sqr(C) / (sqr(A) + sqr(B))) );
+        float D = sqrt( sqr(51.0) - (sqr(C) / (sqr(A) + sqr(B))) );
         float mult = sqrt ( sqr(D) / (sqr(A) + sqr(B)));
         float ax, ay, bx, by;
         ax = X0 + B * mult;
@@ -186,7 +186,9 @@ void reach(float _x, float _y, float _z)
 }
 
 void loop() {
-reach(0,70,0);
+  setAngle(0,90);
+  delay(5000);
+reach(50,80,0);
 delay(9000909);
 
 }
