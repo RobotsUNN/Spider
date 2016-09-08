@@ -65,14 +65,14 @@ float sx, sy;
 void moveS(float _cAngle,float _fAngle,float _tAngle)
 {
   float _cAngle1 = rad2deg(_cAngle) ;
-  float _fAngle1 = 90+rad2deg(_fAngle) - 20;// 70
+  float _fAngle1 = 90+rad2deg(_fAngle)  -20;// -20
   Serial.println("CAngle: ");
   Serial.println(rad2deg(_cAngle));
   Serial.println("FAngle:");
   Serial.println(rad2deg(_fAngle));
   Serial.println("TAngle:");
   Serial.println(rad2deg(_tAngle));
-  float _tAngle1 = 30  + rad2deg(_fAngle) - rad2deg(_tAngle)-30 ;
+  float _tAngle1 = 30  + rad2deg(_fAngle) - rad2deg(_tAngle) - 25; //- 30
   Serial.println("");
   Serial.println(_cAngle1);
   Serial.println(_fAngle1);
@@ -188,7 +188,7 @@ void reach(float _x, float _y, float _z)
 void loop() {
   setAngle(0,90);
   delay(5000);
-reach(50,80,0);
+reach(0,70,0);
 delay(9000909);
 
 }
