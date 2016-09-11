@@ -103,7 +103,7 @@ void reach(float _x, float _y, float _z)
         float localDestX = sqrt(sqr(hDist) - sqr(5.0)) - 14.0;
         Serial.println("New Local DestX: ");
         Serial.println(localDestX);
-        float localDestY = _z - 15.0;
+        float localDestY = _z - 8 ;
         Serial.println("New Local DestY: ");
         Serial.println(localDestY);
         Serial.println("");
@@ -134,41 +134,23 @@ void reach(float _x, float _y, float _z)
         float X1 = (-_B + sqrt(sqr(_B) - 4*_A*_C)) / (2*_A); //ERROR
         float X2 = (-_B - sqrt(sqr(_B) - 4*_A*_C)) / (2*_A); //ERROR
 
-        float jointLocalX = (X1 > X2) ? X1 : X2; //ERROR 
-        Serial.println("JointX: ");
-        Serial.println(jointLocalX);
-        float jointLocalY = ((-C-A*jointLocalX) / B);
+        float Y1 = ((-C-A*X1) / B);
+        float Y2 = ((-C-A*X2) / B);
+        
+        float jointLocalY = (Y1 > Y2) ? Y1 : Y2;
         Serial.println("JointY: ");
         Serial.println(jointLocalY);
+        
+        float jointLocalX = ((jointLocalY * B + C) / -A)  ; //EBRROR 
+        Serial.println("JointX: ");
+        Serial.println(jointLocalX);
+
         Serial.println("");
         float primaryFemurAngle = polarAngle(jointLocalX, jointLocalY);
         float fAngle = primaryFemurAngle;
 
         float primaryTibiaAngle = polarAngle(localDestX - jointLocalX, localDestY - jointLocalY);
         float tAngle = primaryTibiaAngle;
-
-        /*
-        float A = -2 * localDestX;
-        float B = -2 * localDestY;
-        float C = sqr(localDestX) + sqr(localDestY) + sqr(51.0) - sqr(71.0);
-        float X0 = -A * C / (sqr(A) + sqr(B));
-        float Y0 = -B * C / (sqr(A) + sqr(B));
-        float D = sqrt( sqr(51.0) - (sqr(C) / (sqr(A) + sqr(B))) );
-        float mult = sqrt ( sqr(D) / (sqr(A) + sqr(B)));
-        float ax, ay, bx, by;
-        ax = X0 + B * mult;
-        bx = X0 - B * mult;
-        ay = Y0 - A * mult;
-        by = Y0 + A * mult;
-        float jointLocalX = (ax > bx) ? ax : bx;
-        float jointLocalY = (ax > bx) ? ay : by;
-        
-        float primaryFemurAngle = polarAngle(jointLocalX, jointLocalY);
-        float fAngle = primaryFemurAngle; // Стоит учесть стартовый угол
- 
-        float primaryTibiaAngle = polarAngle(localDestX - jointLocalX, localDestY - jointLocalY);
-        float tAngle = (primaryTibiaAngle);
-        */
         moveS(cAngle,fAngle,tAngle);
         
 }
@@ -186,9 +168,14 @@ void reach(float _x, float _y, float _z)
 }
 
 void loop() {
-  setAngle(0,90);
-  delay(5000);
-reach(0,70,0);
-delay(9000909);
+
+reach(70,70, 0);
+delay(500);
+reach(50, 70, 0);
+delay(500);
+reach(50, 90, 0);
+delay(500);
+reach(70, 90, 0);
+delay(500);
 
 }
