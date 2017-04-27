@@ -10,25 +10,6 @@
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-struct Point{
-  float x, y, z;
-  Point()
-  {
-    
-  };
-  Point(float _x, float _y, float _z)
-  {
-    x = _x;
-    y = _y;
-    z = _z;
-  }
-};
-
-class Leg{
-	
-};
-
-
 float sqr(float x)
 {
   return x*x;
@@ -69,15 +50,63 @@ float polarAngle(float x, float y)
     return 0;
 }
 
-void setAngle(int servo,float angle){
-  uint16_t pulselength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
-  pwm.setPWM(servo,0,pulselength);
-}
-
 void logback(char* s,float num)
 {
   Serial.println(s);
   Serial.println(num);
+}
+
+struct Point{
+  float x, y, z;
+  Point()
+  {
+    
+  };
+  Point(float _x, float _y, float _z)
+  {
+    x = _x;
+    y = _y;
+    z = _z;
+  }
+};
+
+class Leg{
+private:
+	Point _cPosition;
+	
+	Point _legPosition;
+	
+	float _cMeshOffset;
+	float _fMeshOffset;
+	float _tMeshOffset;
+	
+	float femurCoxaOffset;
+	
+	float _fLength;
+	float _tLength;
+	
+	float _cDirectionServo;
+	float _fDirectionServo;
+	float _tDirectionServo;
+	
+	int _cPWMServoPin;
+	int _fPWMServoPin;
+	int _tPWMServoPin;
+	
+public:
+Leg(int fPin, int sPin, int tPin, int cMeshOffset, int fMeshOffset, int tMeshOffset, Point& cPosition)
+{
+  _cPWMServoPin = fPin;
+  _fPWMServoPin = sPin;
+  _tPWMServoPin = tPin;
+  _cMeshOffset = cMeshOffset;
+  _fMeshOffset = fMeshOffset;
+  _tMeshOffset = tMeshOffset;
+  _cPosition = cPosition;
+}
+void setAngle(int servo,float angle){
+  uint16_t pulselength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+  pwm.setPWM(servo,0,pulselength);
 }
 
 void reach(Point& point)
@@ -87,14 +116,16 @@ void reach(Point& point)
   float femurCoxaoffset = 30; //сдвиг от движка femur до coxa
   float femurLength = 56;
   float tibiaLength = 78;
-  float hDist = sqrt( sqr(point.x-startCoxaX) +  sqr(point.y-startCoxaY) );
+  float hDist = sqrt( sqr(point.x-this->_cPosition.x) +  sqr(point.y-this->_cPosition.y) );
   logback("Dist to point: ", hDist);
-  float primaryAngle = rad2deg(polarAngle(point.x-startCoxaX,point.y-startCoxaY));
+  float primaryAngle = rad2deg(polarAngle(point.x-this->_cPosition.x,point.y-this->_cPosition.y));
+  logback("X:", point.x-this->_cPosition.x);
+  logback("Y:", point.y-this->_cPosition.y);
   logback("Primary Coxa angle: ", primaryAngle);
-  float cAngle = primaryAngle + 55 ; //55 - угол отклонения координат ноги от общей сетки 
+  float cAngle = primaryAngle + this->_cMeshOffset  ; //55 - угол отклонения координат ноги от общей сетки 
   logback("Coxa angle:", cAngle);
   float localDestX = hDist-femurCoxaoffset; 
-  float localDestY = point.z -20; //оптимальное расстояние от пола 
+  float localDestY = point.z -27; //оптимальное расстояние от пола 
   logback("localdestX:", localDestX);
   logback("localdestY:", localDestY);
   //НАЧАЛО ОПИСАНИЯ ПРЯМОЙ
@@ -122,53 +153,61 @@ void reach(Point& point)
   
   float femurPrimaryAngle = rad2deg(polarAngle(jointLocalX, jointLocalY));
   logback("Primary Femur Angle: ", femurPrimaryAngle);
-  float fAngle = femurPrimaryAngle + 45;
+  float fAngle = femurPrimaryAngle + this->_fMeshOffset;
   logback("Femur Angle: ", fAngle);
   float primaryTibiaAngle = rad2deg(polarAngle(localDestX - jointLocalX, localDestY - jointLocalY));
   logback("Primary tibia Angle: ", primaryTibiaAngle);
-  float tAngle = 5+femurPrimaryAngle-(primaryTibiaAngle) ; //Отклонение от оси X считается как отклонение от оси Tibia + отклонение Tibia от X
+  float tAngle = this->_tMeshOffset+femurPrimaryAngle-(primaryTibiaAngle) ; //Отклонение от оси X считается как отклонение от оси Tibia + отклонение Tibia от X. У Tibia перевернутая сетка.
   logback("Tibia Angle: ", tAngle);
 
- setAngle(0,cAngle);
+ setAngle(this->_cPWMServoPin,cAngle);
 
-  setAngle(1,fAngle);
+  setAngle(this->_fPWMServoPin,fAngle);
  
-  setAngle(2,tAngle);
+  setAngle(this->_tPWMServoPin,tAngle);
   
 }
 
+};
 
+void setAngleNC(int servo,float angle){
+  uint16_t pulselength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+  pwm.setPWM(servo,0,pulselength);
+}
 void setup() {
   Serial.begin(9600);
   pwm.begin();
   pwm.setPWMFreq(60);
   yield();
-  //test.attach(10);
- // testMove(50,170,0);
- //Serial.println("First point: ");
-   //testMove(70,150,0);
-     //Serial.println("Second point: ");
-   //testMove(100,150,0);  
-  // Serial.println("Third point: ");
-   // testMove(100,180,0);
-     //Serial.println("4 point: ");
-   // testMove(70,180,0);
-  //delay(2000);
 }
 
 void loop() {
-  /*Serial.println("First point: ");
-   testMove(70,150,5);
-   delay(2000);
-     Serial.println("Second point: ");
-   testMove(100,150,5);  
-   delay(2000);
-   Serial.println("Third point: ");
-    testMove(100,180,5);
-    delay(2000);
-     Serial.println("4 point: ");
-    testMove(70,180,5);
-    delay(2000);*/
+
+// setAngleNC(2,90);
+Point cPos(31.5,8,0);
+Leg second(0,1,2,93,37,2,cPos);
+Point f(120,10,0);
+Point s(150,10,0);
+Point t(150,40,0);
+Point fo(120,40,0);
+//Point f(70,150,0);
+//Point s(100,150,0);
+//Point t(100,180,0);
+//Point fo(70,180,0);
+Serial.println("First point: ");
+second.reach(f);
+delay(2000);
+Serial.println("Second point: ");
+second.reach(s);
+delay(2000);
+Serial.println("Third point: ");
+second.reach(t);
+delay(2000);
+Serial.println("4 point: ");
+second.reach(fo);
+delay(2000);
+
+ 
 
   
 
