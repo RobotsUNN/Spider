@@ -37,7 +37,7 @@ float polarAngle(float x, float y)
     }
 
     if (x < 0 && y < 0)
-        return atan(y / x) - PI;
+        return atan(y / x) + PI;
 
 
     if (y > 0) // x = 0
@@ -127,7 +127,7 @@ void reach(Point& point)
   logback("X:", point.x-this->_cPosition.x);
   logback("Y:", point.y-this->_cPosition.y);
   logback("Primary Coxa angle: ", primaryAngle);
-  float cAngle = primaryAngle + this->_Direction*this->_cMeshOffset  ; //55 - угол отклонения координат ноги от общей сетки
+  float cAngle = primaryAngle + this->_Direction*this->_cMeshOffset; //55 - угол отклонения координат ноги от общей сетки
   logback("Coxa angle:", cAngle);//инверт не работает
   float localDestX = hDist-femurCoxaoffset;
   float localDestY = point.z -27; //оптимальное расстояние от пола
@@ -199,12 +199,12 @@ void loop() {
 
 
 //setAngleNC(0,90);
-Point cPos(-31.5,70,0);
-Leg second(0,1,2,-1,58,36,0,cPos);
-Point f(-120,20,0);
-Point s(-150,20,0);
-Point t(-150,50,0);
-Point fo(-120,50,0);
+Point cPos(31.5,-64,0);
+Leg second(0,1,2,1,125,48,5,cPos);
+Point f(90,-120,0);
+Point s(120,-120,0);
+Point t(120,-150,0);
+Point fo(90,-150,0);
 Serial.println("First point: ");
 second.reach(f);
 delay(2000);
